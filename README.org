@@ -1,0 +1,66 @@
+#+TITLE:cl-pure-data -- Common Lisp bindings for libpd.
+
+This is a chaotic set of bindings for libpd, the data-processing interface for PureData. This library *does not* emit any sound or picture -- you have to create images and sounds yourself.
+
+* Getting Started
+
+Clone the repository:
+#+begin_src sh
+  git clone https://github.com/aartaka/cl-pure-data
+#+end_src
+
+Load the library into your Lisp image:
+#+begin_src lisp
+  (asdf:load-asd #p"/path/to/cl-pure-data/cl-pure-data.asd")
+  (asdf:load-asd :cl-pure-data)
+#+end_src
+
+The dependencies are CFFI and Alexandria, they are easy to reach in almost any implementation. Additionally, make sure [[https://github.com/libpd/libpd][libpd]] is in your ~cffi:*foreign-library-directories*~.
+
+After it loads fine, you can start hacking:
+#+begin_src lisp
+  ;; Initialize hooks to print everything out.
+  (pd:init-default-hooks)
+  ;; Initialize audio to two input, two outputs and sample rate of 44100.
+  (pd:init-audio 2 2 44100)
+  ;; Load a patch from somewhere in the filesystem.
+  (pd:open-patch #p"/nested/directories/and/whatever.pd")
+  ;; Feed the data for three ticks into the image.
+  (pd:process #(3.0 4.3 1.0 ...) 3)
+#+end_src
+
+And then do whatever you want with the data you get!
+
+* Structure of the library
+- Low-level API:
+  - libpd.lisp :: low-level bindings to libpd. C functions with lispy names, beware of malloc&free business!
+- High-level API:
+  - hooks.lisp :: high-level bindings to PD event hooks. Simply ~push~ your function into the hook you like, and you'll see the effect the next time the event fires!
+  - arr.lisp :: high-level-ish bindings for PD arrays. Exposes ~arr~ to reference arrays by name, ~contents~ to get subsequences of those (literally the same set of arguments as ~subseq~), and ~elem~ to reference just one element (think ~elt~). Both ~contents~ and ~elem~ are ~setf~-able.
+  - audio.lisp :: high-level API to PD audio processing capabilities. ~init-audio~ sets things up for processing, while ~process~ takes an input and produces and output, threading it all through PureData image.
+  - pure-data.lisp :: generic high-level macros (~with-pd~, ~defpdfun~), patch handling (~open-patch~, ~close-patch~, ~with-patch~), message-sending (~message~), and cleanup (~release~).
+
+* Thing that this library can do:
+- Directly interfacing with ~libpd.~
+  - ~libpd~ package with the function names mirroring the ones from libpd.
+- Initializing PureData instance.
+  - happens automatically when you call any function from ~cl-pure-data~ package or via ~libpd:libpd-init~.
+- Loading and unloading PureData patches (.pd) into the instance.
+- Binding hooks to PureData events.
+  - Binding sensible default hooks via ~init-default-hooks~.
+  - Binding to individual hooks (from hooks.lisp) via simple ~(push #'handler hook)~.
+- Sending messages to the current instance via ~message~.
+
+* Things that this library cannot do (yet?)
+- [ ] Subscribing to events sent by PD.
+- [ ] MIDI interfacing (I've been too lazy and MIDI-ignorant to do it...)
+- [ ] Wrapping messages [[https://github.com/libpd/libpd/wiki/libpd#sending-compound-messages-flexible-approach][the right way]].
+- [ ] Concatenating print messages (although simply printing them to standard output works fine too...)
+- [ ] Conveniently managing instances. Right now instances are only swap-able when using ~libpd~ package. Ideally, this package should never be accessed by the end-user. Even though it's exported.
+- [ ] Binding [[https://github.com/libpd/libpd/wiki/libpd#libpd_queued][queued API]] for thread-safety.
+- [ ] Producing sound (although using [[https://github.com/varjagg/also-alsa][also-alsa]] or [[https://github.com/filonenko-mikhail/cl-portaudio][cl-portaudio]] should be pretty straightforward in this context).
+  - [ ] Producing visuals is not an option either, until you leverage some image/video library.
+- [ ] Making new PureData patches out of Lisp code.
+  - Should be relatively easy---take Lisp code, process it into .pd code format, write it into a file, and load it into the current instance.
+    - Now, how do we express self-referential and multiple-output nodes in essentially non-cyclical code...
+- [ ] Signaling recoverable conditions for some exceptional case, like broken messages.
