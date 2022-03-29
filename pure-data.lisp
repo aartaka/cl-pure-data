@@ -28,13 +28,14 @@ This macro will manage all the PD internals and initialization for the user of t
        ,@declarations
        (if *instance*
            (libpd:libpd-set-instance *instance*)
-           (libpd:libpd-init))
+           (progn
+             (libpd:libpd-init)
+             (setf *instance* (libpd:libpd-this-instance))))
        (init-hooks)
        (libpd:libpd-clear-search-path)
        (mapcar (alexandria:compose #'libpd:libpd-add-to-search-path #'uiop:native-namestring)
                *search-path*)
        (libpd:libpd-set-verbose *verbose*)
-       (setf *instance* (libpd:libpd-this-instance))
        ,@body)))
 
 (defpdfun open-patch ((pathname pathname))
