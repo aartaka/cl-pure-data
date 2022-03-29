@@ -26,6 +26,7 @@ After it loads fine, you can start hacking:
   ;; Load a patch from somewhere in the filesystem.
   (pd:open-patch #p"/nested/directories/and/whatever.pd")
   ;; Feed the data for three ticks into the image.
+  ;; DOES NOT PLAY ANY AUDIO :(
   (pd:process #(3.0 4.3 1.0 ...) 3)
 #+end_src
 
@@ -39,6 +40,13 @@ And then do whatever you want with the data you get!
   - arr.lisp :: high-level-ish bindings for PD arrays. Exposes ~arr~ to reference arrays by name, ~contents~ to get subsequences of those (literally the same set of arguments as ~subseq~), and ~elem~ to reference just one element (think ~elt~). Both ~contents~ and ~elem~ are ~setf~-able.
   - audio.lisp :: high-level API to PD audio processing capabilities. ~init-audio~ sets things up for processing, while ~process~ takes an input and produces and output, threading it all through PureData image.
   - pure-data.lisp :: generic high-level macros (~with-pd~, ~defpdfun~), patch handling (~open-patch~, ~close-patch~, ~with-patch~), message-sending (~message~), and cleanup (~release~).
+
+Most of the ~cl-pure-data~ functions return
+- ~t~ (or other meaningful truthy value) on success
+- and ~nil~ on failure,
+- but some also signal conditions, so watch out!
+
+Someday this will be more structured. Someday...
 
 * Thing that this library can do:
 - Directly interfacing with ~libpd.~
