@@ -12,6 +12,9 @@ If nil, PD is not yet initialized.")
 (defvar *patches* '()
   "A list of all the opened patches (as raw pointers).")
 
+(defvar *subscriptions* '()
+  "A list of the subscribed events (as raw pointers)")
+
 (defvar *search-path* '()
   "List of paths to search for external patches.")
 
@@ -71,8 +74,14 @@ Close the patch after BODY returns."
             (progn ,@body)
          (close-patch ,var)))))
 
+(defpdfun subscribe ((sender string))
+  (push (libpd:libpd-bind sender) *subscriptions*)
+  t)
+
 (defpdfun release ()
-  (mapcar #'close-patch *patches*))
+  (mapcar #'close-patch *patches*)
+  (mapcar #'libpd:libpd-unbind *subscriptions*)
+  t)
 
 (defun low-princ (object)
   (let ((*print-case* :downcase))

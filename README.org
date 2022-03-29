@@ -60,7 +60,7 @@ Someday this will be more structured. Someday...
 - Sending messages to the current instance via ~message~.
 
 * Things that this library cannot do (yet?)
-- [ ] Subscribing to events sent by PD.
+- [X] Subscribing to messages sent by PD.
 - [ ] MIDI interfacing (I've been too lazy and MIDI-ignorant to do it...)
 - [ ] Wrapping messages [[https://github.com/libpd/libpd/wiki/libpd#sending-compound-messages-flexible-approach][the right way]].
 - [ ] Concatenating print messages (although simply printing them to standard output works fine too...)

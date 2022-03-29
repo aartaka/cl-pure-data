@@ -34,7 +34,8 @@
    #:open-patch
    #:close-patch
    #:with-patch
-   #:message))
+   #:message
+   #:subscribe))
 
 (defpackage #:libpd
   (:import-from #:cffi #:defcfun)
