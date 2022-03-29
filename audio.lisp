@@ -15,6 +15,14 @@
   "Block size.")
 
 (defpdfun init-audio (ins outs sample-rate)
+  "Initialize the audio-processing side of PD.
+
+INS is the number of input channels (can be zero).
+OUTS is the number of output channels (can be zero?)
+SAMPLE-RATE is the sample rate at which to play (44100, 48K etc.)
+
+Sets `*audio-in-channels*', `*audio-out-channels*',
+`*audio-sample-rate*', and `*audio-block-size*' when ran."
   (prog1
       (zerop (libpd:libpd-init-audio ins outs sample-rate))
     (setf *audio-in-channels* ins
@@ -23,15 +31,23 @@
           *audio-block-size* (libpd:libpd-blocksize))))
 
 (defpdfun process (in-buffer &optional (ticks 1))
-  (let* ((block-size (libpd:libpd-blocksize))
-         (out-size (* ticks block-size *audio-out-channels*))
+  "Process the IN-BUFFER data in PD for TICKS and return the result of the processing.
+
+The result is either single-float array of size
+(* TICKS *AUDIO-BLOCK-SIZE* *AUDIO-OUT-CHANNELS*)
+or signaled condition.
+
+Ensure that IN-BUFFER has length of
+(* TICKS *AUDIO-BLOCK-SIZE* *AUDIO-IN-CHANNELS*)
+before calling this. "
+  (let* ((out-size (* ticks *audio-block-size* *audio-out-channels*))
+         ;; FIXME: A dirty hack with an unexported API.
          (array-type (cffi::ensure-parsed-base-type
                       (list :array :float out-size))))
     (assert (= (length in-buffer)
-               (* ticks block-size *audio-in-channels*)))
+               (* ticks *audio-block-size* *audio-in-channels*)))
     (cffi:with-foreign-array
-        (out-buffer (make-array out-size :initial-element (coerce 0 'single-float))
-                    array-type)
+        (out-buffer (make-array out-size :initial-element (coerce 0 'single-float)) array-type)
       (typecase in-buffer
         ((array single-float)
          (libpd:libpd-process-float
