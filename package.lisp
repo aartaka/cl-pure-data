@@ -17,6 +17,7 @@
    #:*audio-in-channels*
    #:*audio-out-channels*
    #:*audio-sample-rate*
+   #:*audio-block-size*
    #:init-audio
    #:process
 
