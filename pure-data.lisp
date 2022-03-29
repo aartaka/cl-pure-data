@@ -18,6 +18,19 @@ If nil, PD is not yet initialized.")
 (defvar *search-path* '()
   "List of paths to search for external patches.")
 
+(defmethod init ()
+  "Unexported initialization sequence that happens before every defpdfun-ed function call."
+  (if *instance*
+      (libpd:libpd-set-instance *instance*)
+      (progn
+        (libpd:libpd-init)
+        (setf *instance* (libpd:libpd-this-instance))))
+  (init-hooks)
+  (libpd:libpd-clear-search-path)
+  (mapcar (alexandria:compose #'libpd:libpd-add-to-search-path #'uiop:native-namestring)
+          *search-path*)
+  (libpd:libpd-set-verbose *verbose*))
+
 (defmacro defpdfun (name args &body body)
   "Define a new external API function.
 
@@ -29,16 +42,7 @@ This macro will manage all the PD internals and initialization for the user of t
     `(defmethod ,name ,args
        ,documentation
        ,@declarations
-       (if *instance*
-           (libpd:libpd-set-instance *instance*)
-           (progn
-             (libpd:libpd-init)
-             (setf *instance* (libpd:libpd-this-instance))))
-       (init-hooks)
-       (libpd:libpd-clear-search-path)
-       (mapcar (alexandria:compose #'libpd:libpd-add-to-search-path #'uiop:native-namestring)
-               *search-path*)
-       (libpd:libpd-set-verbose *verbose*)
+       (init)
        ,@body)))
 
 (defpdfun open-patch ((pathname pathname))
