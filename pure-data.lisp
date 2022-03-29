@@ -10,7 +10,7 @@ If nil, PD is not yet initialized.")
   "Verbose print state.")
 
 (defvar *patches* '()
-  "A list of all the opened patches.")
+  "A list of all the opened patches (as raw pointers).")
 
 (defvar *search-path* '()
   "List of paths to search for external patches.")
