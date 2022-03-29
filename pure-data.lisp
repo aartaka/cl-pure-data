@@ -15,12 +15,6 @@ If nil, PD is not yet initialized.")
 (defvar *search-path* '()
   "List of paths to search for external patches.")
 
-(defmacro with-pd (&body body)
-  "Run the BODY, ensuring that PD is running fine."
-  `(progn
-     
-     ,@body))
-
 (defmacro defpdfun (name args &body body)
   "Define a new external API function.
 
