@@ -35,7 +35,8 @@
    #:close-patch
    #:with-patch
    #:message
-   #:subscribe))
+   #:subscribe
+   #:release))
 
 (defpackage #:libpd
   (:import-from #:cffi #:defcfun)
