@@ -14,7 +14,7 @@
 (defvar *audio-block-size* nil
   "Block size.")
 
-(defpdfun init-audio (ins outs sample-rate)
+(defpdfun init-audio ((ins integer) (outs integer) (sample-rate integer))
   "Initialize the audio-processing side of PD.
 
 INS is the number of input channels (can be zero).
@@ -30,7 +30,7 @@ Sets `*audio-in-channels*', `*audio-out-channels*',
           *audio-sample-rate* sample-rate
           *audio-block-size* (libpd:libpd-blocksize))))
 
-(defpdfun process (in-buffer &optional (ticks 1))
+(defpdfun process ((in-buffer array) &optional (ticks 1))
   "Process the IN-BUFFER data in PD for TICKS and return the result of the processing.
 
 The result is either single-float array of size
