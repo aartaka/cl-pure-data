@@ -11,11 +11,16 @@
 (defvar *audio-sample-rate* nil
   "Sample rate.")
 
+(defvar *audio-block-size* nil
+  "Block size.")
+
 (defpdfun init-audio (ins outs sample-rate)
-  (setf *audio-in-channels* ins
-        *audio-out-channels* outs
-        *audio-sample-rate* sample-rate)
-  (zerop (libpd:libpd-init-audio ins outs sample-rate)))
+  (prog1
+      (zerop (libpd:libpd-init-audio ins outs sample-rate))
+    (setf *audio-in-channels* ins
+          *audio-out-channels* outs
+          *audio-sample-rate* sample-rate
+          *audio-block-size* (libpd:libpd-blocksize))))
 
 (defpdfun process (in-buffer &optional (ticks 1))
   (let* ((block-size (libpd:libpd-blocksize))
