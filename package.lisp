@@ -34,12 +34,7 @@
    #:open-patch
    #:close-patch
    #:with-patch
-   #:message
-
-   ;; Instances
-   #:instance
-   #:destroy-instance
-   #:number-of-instances))
+   #:message))
 
 (defpackage #:libpd
   (:import-from #:cffi #:defcfun)
