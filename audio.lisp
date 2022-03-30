@@ -65,3 +65,6 @@ before calling this. "
                  :count (array-dimension in-buffer 0))
           out-buffer)))
       (cffi:foreign-array-to-lisp out-buffer array-type))))
+
+(defmethod process ((in-buffer null) &optional (ticks 1))
+  (call-next-method #() ticks))
