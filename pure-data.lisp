@@ -64,7 +64,8 @@ Returns either the new patch object or nil if something's wrong"
 
 Return T in case of success, nil otherwise. If it hangs -- something's terribly wrong."
   (unless (cffi:null-pointer-p patch)
-    (zerop (libpd:libpd-closefile patch))))
+    (libpd:libpd-closefile patch)
+    t))
 
 (defmacro with-patch ((var pathname) &body body)
   "Open and bind patch from PATHNAME to VAR in the scope of the BODY.
