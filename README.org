@@ -25,6 +25,8 @@ After it loads fine, you can start hacking:
   (pd:init-audio 2 2 44100)
   ;; Load a patch from somewhere in the filesystem.
   (pd:open-patch #p"/nested/directories/and/whatever.pd")
+  ;; Enable Direct Sound Processing (e.g. playback of the data you feed into libpd).
+  (pd:message "pd" "dsp" 1)
   ;; Feed the data for three ticks into the image.
   ;; DOES NOT PLAY ANY AUDIO :(
   (pd:process #(3.0 4.3 1.0 ...) 3)
