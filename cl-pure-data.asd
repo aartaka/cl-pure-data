@@ -15,3 +15,8 @@
                (:file "audio")))
 
 ;; TODO: Make #:pd/alsa to generate sounds.
+(asdf:defsystem #:cl-pure-data/alsa
+  :description "The ALSA-enabled playback extension for cl-pure-data."
+  :serial t
+  :depends-on (#:also-alsa #:cl-pure-data)
+  :components ((:file "alsa")))
