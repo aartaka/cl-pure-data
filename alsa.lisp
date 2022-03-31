@@ -30,8 +30,8 @@
         (buffer-size (also-alsa:buffer-size *alsa-out*)))
     (loop for i below ticks
           for start = (* i buffer-size)
-          for buffer = (subseq result start (+ start buffer-size))
-          do (setf (subseq (also-alsa:buffer *alsa-out*) 0 buffer-size) buffer)
+          do (setf (subseq (also-alsa:buffer *alsa-out*) 0 buffer-size)
+                   (subseq result start))
           do (also-alsa:alsa-write *alsa-out*))))
 
 (defmethod pd:release :around ()
