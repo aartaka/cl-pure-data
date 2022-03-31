@@ -47,8 +47,11 @@ before calling this. "
     (assert (= (length in-buffer)
                (* ticks *audio-block-size* *audio-in-channels*)))
     (cffi:with-foreign-array
-        (out-buffer (make-array out-size :initial-element (coerce 0 'single-float)) array-type)
+        (out-buffer (make-array out-size :element-type 'single-float) array-type)
       (typecase in-buffer
+        ((array * (0))
+         (libpd:libpd-process-float
+          ticks (cffi:null-pointer) out-buffer))
         ((array single-float)
          (libpd:libpd-process-float
           ticks (cffi:foreign-alloc
