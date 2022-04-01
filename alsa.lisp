@@ -32,7 +32,8 @@
           for start = (* i buffer-size)
           do (setf (subseq (also-alsa:buffer *alsa-out*) 0 buffer-size)
                    (subseq result start))
-          do (also-alsa:alsa-write *alsa-out*))))
+          do (also-alsa:alsa-write *alsa-out*)
+          finally (return result))))
 
 (defmethod pd:release :around ()
   (prog1
