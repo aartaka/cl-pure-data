@@ -9,8 +9,8 @@ If nil, PD is not yet initialized.")
 (defvar *verbose* 1
   "Verbose print state.")
 
-(defvar *patches* '()
-  "A list of all the opened patches (as raw pointers).")
+(defvar *patches* (make-hash-table :test #'equal)
+  "A table of all the opened patches (as path -> raw pointers hash table).")
 
 (defvar *subscriptions* '()
   "A list of the subscribed events (as raw pointers)")
@@ -48,46 +48,53 @@ This macro will manage all the PD internals and initialization for the user of t
 (defpdfun open-patch ((pathname pathname))
   "Open the patch at PATHNAME.
 
-Returns either the new patch object or nil if something's wrong"
+Returns either t if it's open or nil if something's wrong."
   (unless (uiop:directory-pathname-p pathname)
-    (let ((patch (libpd:libpd-openfile
-                  (uiop:strcat (pathname-name pathname)
-                               "." (pathname-type pathname))
-                  (uiop:native-namestring
-                   (uiop:pathname-directory-pathname pathname)))))
+    (let* ((pathname (if (uiop:relative-pathname-p pathname)
+                         (uiop:merge-pathnames* pathname (uiop:getcwd))
+                         pathname))
+           (patch (libpd:libpd-openfile
+                   (uiop:strcat (pathname-name pathname)
+                                "." (pathname-type pathname))
+                   (uiop:native-namestring
+                    (uiop:pathname-directory-pathname pathname)))))
       (unless (cffi:null-pointer-p patch)
-        (pushnew patch *patches*)
-        patch))))
+        (setf (gethash (uiop:native-namestring pathname) *patches*) patch)
+        t))))
 
 (defmethod open-patch ((pathname string))
   (call-next-method (uiop:parse-native-namestring pathname)))
 
-(defpdfun close-patch (patch)
-  "Close patch by PATCH object.
+(defpdfun close-patch ((pathname pathname))
+  "Close patch from PATHNAME.
 
 Return T in case of success, nil otherwise. If it hangs -- something's terribly wrong."
-  (unless (cffi:null-pointer-p patch)
-    (libpd:libpd-closefile patch)
+  (when (and pathname (uiop:absolute-pathname-p pathname))
+    (libpd:libpd-closefile (getf (uiop:native-namestring pathname) *patches*))
     t))
 
-(defmacro with-patch ((var pathname) &body body)
-  "Open and bind patch from PATHNAME to VAR in the scope of the BODY.
+(defmethod close-patch ((pathname string))
+  (call-next-method (uiop:parse-native-namestring pathname)))
+
+(defmacro with-patch (pathname &body body)
+  "Open the patch from PATHNAME in the scope of the BODY.
 
 Return T in case of success, nil otherwise. If it hangs -- something's terribly wrong.
 
 Close the patch after BODY returns."
-  (alexandria:once-only (pathname)
-    `(let ((,var (open-patch ,pathname)))
-       (unwind-protect
-            (progn ,@body)
-         (close-patch ,var)))))
+  (let ((var (gensym "result")))
+    (alexandria:once-only (pathname)
+      `(alexandria:when-let ((,var (open-patch ,pathname)))
+         (unwind-protect
+              (progn ,@body)
+           (close-patch ,pathname))))))
 
 (defpdfun subscribe ((sender string))
   (push (libpd:libpd-bind sender) *subscriptions*)
   t)
 
 (defpdfun release ()
-  (mapcar #'close-patch *patches*)
+  (mapcar #'close-patch (alexandria:hash-table-keys *patches*))
   (mapcar #'libpd:libpd-unbind *subscriptions*)
   t)
 
