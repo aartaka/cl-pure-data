@@ -59,6 +59,9 @@ Returns either the new patch object or nil if something's wrong"
         (pushnew patch *patches*)
         patch))))
 
+(defmethod open-patch ((pathname string))
+  (call-next-method (uiop:parse-native-namestring pathname)))
+
 (defpdfun close-patch (patch)
   "Close patch by PATCH object.
 
