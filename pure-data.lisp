@@ -120,6 +120,7 @@ else - send the message named by first element with the content being the rest."
             ((or integer double-float single-float)
              (libpd:libpd-float receiver (coerce content 'single-float)))
             (string (libpd:libpd-symbol receiver content))
+            (null (libpd:libpd-float receiver 0.0))
             (symbol (libpd:libpd-symbol receiver (low-princ content))))))
      (otherwise
       (destructuring-bind (message &rest content)
@@ -131,6 +132,7 @@ else - send the message named by first element with the content being the rest."
                       (libpd:libpd-add-float (coerce content 'single-float)))
                      (single-float (libpd:libpd-add-float content))
                      (string (libpd:libpd-add-symbol content))
+                     (null (libpd:libpd-add-float 0.0))
                      (symbol (libpd:libpd-add-symbol (low-princ content)))
                      (sequence (mapc #'add-content content)))))
           (add-content content))
