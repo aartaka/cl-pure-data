@@ -63,7 +63,7 @@ Returns either t if it's open or nil if something's wrong."
         t))))
 
 (defmethod open-patch ((pathname string))
-  (call-next-method (uiop:parse-native-namestring pathname)))
+  (open-patch (uiop:parse-native-namestring pathname)))
 
 (defpdfun close-patch ((pathname pathname))
   "Close patch from PATHNAME.
@@ -74,7 +74,7 @@ Return T in case of success, nil otherwise. If it hangs -- something's terribly 
     t))
 
 (defmethod close-patch ((pathname string))
-  (call-next-method (uiop:parse-native-namestring pathname)))
+  (close-patch (uiop:parse-native-namestring pathname)))
 
 (defmacro with-patch (pathname &body body)
   "Open the patch from PATHNAME in the scope of the BODY.
