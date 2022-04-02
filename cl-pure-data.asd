@@ -12,7 +12,8 @@
                (:file "hooks")
                (:file "pure-data")
                (:file "arr")
-               (:file "audio")))
+               (:file "audio")
+               (:file "proxy")))
 
 ;; TODO: Make #:pd/alsa to generate sounds.
 (asdf:defsystem #:cl-pure-data/alsa
