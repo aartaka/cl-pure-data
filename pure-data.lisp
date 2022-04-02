@@ -70,7 +70,7 @@ Returns either t if it's open or nil if something's wrong."
 
 Return T in case of success, nil otherwise. If it hangs -- something's terribly wrong."
   (when (and pathname (uiop:absolute-pathname-p pathname))
-    (libpd:libpd-closefile (getf (uiop:native-namestring pathname) *patches*))
+    (libpd:libpd-closefile (gethash (uiop:native-namestring pathname) *patches*))
     t))
 
 (defmethod close-patch ((pathname string))
