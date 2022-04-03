@@ -9,26 +9,13 @@
 (defvar *pd* nil "The stream to serialize the objects to.")
 
 (defvar *proxies* (make-hash-table)
-  "The map of all the proxies, from their name to their meta-data.")
+  "The map of all the proxies, from their name to their current patch file.")
 
-(defstruct proxy
-  (active? nil :type boolean :read-only t)
-  (file nil :type (or pathname null) :read-only t))
+(defvar *last-proxy-messages*
+  (make-hash-table)
+  "The map of the last messages sent by every proxy out there.
 
-(defun (setf proxy-active?) (activate proxy)
-  (check-type proxy proxy)
-  (unless (eq activate (slot-value proxy 'active?))
-    (if activate
-        (pd:open-patch (proxy-file proxy))
-        (pd:close-patch (proxy-file proxy))))
-  (setf (slot-value proxy 'active?) activate))
-
-(defun (setf proxy-file) (new-file proxy)
-  (check-type proxy proxy)
-  (unless (equalp new-file (slot-value proxy 'file))
-    (pd:close-patch (proxy-file proxy))
-    (setf (slot-value proxy 'file) new-file)
-    (pd:open-patch (proxy-file proxy))))
+A symbol->alist hash-table.")
 
 (defun get-id ()
   (prog1
@@ -80,6 +67,17 @@
     (push (list (line-id in) 0 (line-id value) (position in (object-line-incoming value))) *connections*))
   (format *pd* "#X obj 100 100 ~a~{ ~a~};~%"
           (object-line-name value) (object-line-args value)))
+
+(defun proxy-on (name path)
+  (unless (equal (gethash name *proxies*) path)
+    (alexandria:when-let ((proxy-file (gethash name *proxies*)))
+      (close-patch proxy-file))
+    (open-patch (setf (gethash name *proxies*) path))))
+
+(defun proxy-off (name)
+  (alexandria:when-let ((proxy-file (gethash name *proxies*)))
+    (remhash name *proxies*)
+    (close-patch proxy-file)))
 
 (defmacro defproxy (name args &body body)
   "Create a proxy -- a set of functions binding Lisp code to a PD file loadable into the image.
@@ -142,23 +140,25 @@ Example:
                         parsed-args
                       (declare (ignorable _))
                       (append required (mapcar #'first optional)
-                              (uiop:ensure-list rest) (mapcar #'cadar keywords)))))
-    (uiop:with-temporary-file (:pathname path
-                               :stream *pd*
-                               :type "pd"
-                               :direction :output
-                               :keep t)
-      (pd-serialize compiled)
-      (let ((old-proxy (gethash name *proxies*))
-            (new-proxy (make-proxy :file path)))
-        (setf (gethash name *proxies*) new-proxy)
-        (when old-proxy
-          (setf (proxy-active? new-proxy) (proxy-active? old-proxy))))
-      `(progn
-         (defun ,name ,args
-           (setf (proxy-file (gethash (quote ,name) *proxies*)) ,path)
-           (setf (proxy-active? (gethash (quote ,name) *proxies*)) t)
-           ,@(loop for arg in arg-names
-                   collect `(when ,arg (pd:message ,(pd::low-princ arg) ,arg))))
-         (defun ,(intern (format nil "~a-OFF" (symbol-name name))) ()
-           (setf (proxy-active? (gethash (quote ,name) *proxies*)) nil))))))
+                              (uiop:ensure-list rest) (mapcar #'cadar keywords))))
+         (path (uiop:with-temporary-file (:pathname path
+                                          :stream *pd*
+                                          :type "pd"
+                                          :keep t)
+                 (pd-serialize compiled)
+                 path)))
+    (when (gethash name *proxies*)
+      (proxy-on name path)
+      (loop for (receiver . value) in (gethash name *last-proxy-messages*)
+            do (pd:message receiver value)))
+    `(progn
+       (defun ,name ,args
+         (proxy-on (quote ,name) ,path)
+         (setf (gethash (quote ,name) *last-proxy-messages*) '())
+         ,@(loop for arg in arg-names
+                 collect `(when ,arg
+                            (push (cons ,(low-princ arg) ,arg)
+                                  (gethash (quote ,name) *last-proxy-messages*))
+                            (pd:message ,(low-princ arg) ,arg))))
+       (defun ,(intern (format nil "~a-OFF" (symbol-name name))) ()
+         (proxy-off (quote ,name))))))
