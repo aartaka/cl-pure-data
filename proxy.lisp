@@ -56,12 +56,12 @@
         else
           collect el into args
         finally (return (make-object-line
-                         :name (pd::low-princ (first value))
+                         :name (low-princ (first value))
                          :args args
                          :incoming (mapcar #'pd-compile connections)))))
 
 (defmethod pd-compile ((value symbol))
-  (make-variable-line :name (pd::low-princ value)))
+  (make-variable-line :name (low-princ value)))
 
 (defmethod pd-serialize ((value toplevel))
   (format *pd* "#N canvas 50 50 2000 8000 14;~%")
