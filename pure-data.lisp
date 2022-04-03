@@ -59,8 +59,9 @@ Returns either t if it's open or nil if something's wrong."
                                   "." (pathname-type pathname))
                      (uiop:native-namestring
                       (uiop:pathname-directory-pathname pathname))))))
-      (unless (or (cffi:null-pointer-p patch)
-                  (gethash (uiop:native-namestring pathname) *patches*))
+      (unless (or (null patch)
+                  (and (cffi:pointerp patch)
+                       (cffi:null-pointer-p patch)))
         (setf (gethash (uiop:native-namestring pathname) *patches*) patch)
         t))))
 
