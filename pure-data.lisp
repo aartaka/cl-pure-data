@@ -69,7 +69,9 @@ Returns either t if it's open or nil if something's wrong."
   "Close patch from PATHNAME.
 
 Return T in case of success, nil otherwise. If it hangs -- something's terribly wrong."
-  (when (and pathname (uiop:absolute-pathname-p pathname))
+  (when (and pathname
+             (uiop:absolute-pathname-p pathname)
+             (gethash (uiop:native-namestring pathname) *patches*))
     (libpd:libpd-closefile (gethash (uiop:native-namestring pathname) *patches*))
     t))
 
