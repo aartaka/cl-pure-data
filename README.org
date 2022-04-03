@@ -71,7 +71,7 @@ Someday this will be more structured. Someday...
 - [X] Producing sound (although using [[https://github.com/varjagg/also-alsa][also-alsa]] or [[https://github.com/filonenko-mikhail/cl-portaudio][cl-portaudio]] should be pretty straightforward in this context).
   - [ ] There's also-alsa-based backend now, but it only plays well with one output channel :D
   - [ ] Producing visuals is not an option either, until you leverage some image/video library.
-- [ ] Making new PureData patches out of Lisp code.
-  - Should be relatively easy---take Lisp code, process it into .pd code format, write it into a file, and load it into the current instance.
-    - Now, how do we express self-referential and multiple-output nodes in essentially non-cyclical code...
+- [X] Making new PureData patches out of Lisp code.
+  - [X] Should be relatively easy---take Lisp code, process it into .pd code format, write it into a file, and load it into the current instance.
+    - [ ] Now, how do we express self-referential and multiple-output nodes in essentially non-cyclical code...
 - [ ] Signaling recoverable conditions for some exceptional case, like broken messages.
