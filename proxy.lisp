@@ -118,7 +118,7 @@ Example:
 \(bloopy-off)
 
 ;; Create an even simpler proxy, yet having an argument.
-\(pd::defproxy osc (&optional (freq 440))
+\(pd:defproxy osc (&optional (freq 440))
   (dac~ (osc~ freq)))
 
 ;; Initialize it and make it play sound. Use the default frequency.
