@@ -53,11 +53,12 @@ Returns either t if it's open or nil if something's wrong."
     (let* ((pathname (if (uiop:relative-pathname-p pathname)
                          (uiop:merge-pathnames* pathname (uiop:getcwd))
                          pathname))
-           (patch (libpd:libpd-openfile
-                   (uiop:strcat (pathname-name pathname)
-                                "." (pathname-type pathname))
-                   (uiop:native-namestring
-                    (uiop:pathname-directory-pathname pathname)))))
+           (patch (unless (gethash (uiop:native-namestring pathname) *patches*)
+                    (libpd:libpd-openfile
+                     (uiop:strcat (pathname-name pathname)
+                                  "." (pathname-type pathname))
+                     (uiop:native-namestring
+                      (uiop:pathname-directory-pathname pathname))))))
       (unless (or (cffi:null-pointer-p patch)
                   (gethash (uiop:native-namestring pathname) *patches*))
         (setf (gethash (uiop:native-namestring pathname) *patches*) patch)
