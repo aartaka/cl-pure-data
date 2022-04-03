@@ -16,6 +16,7 @@
   (file nil :type (or pathname null) :read-only t))
 
 (defun (setf proxy-active?) (activate proxy)
+  (check-type proxy proxy)
   (unless (eq activate (slot-value proxy 'active?))
     (if activate
         (pd:open-patch (proxy-file proxy))
