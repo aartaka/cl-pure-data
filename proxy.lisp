@@ -148,7 +148,11 @@ Example:
                                :direction :output
                                :keep t)
       (pd-serialize compiled)
-      (setf (gethash name *proxies*) (make-proxy :file path))
+      (let ((old-proxy (gethash name *proxies*))
+            (new-proxy (make-proxy :file path)))
+        (setf (gethash name *proxies*) new-proxy)
+        (when old-proxy
+          (setf (proxy-active? new-proxy) (proxy-active? old-proxy))))
       `(progn
          (defun ,name ,args
            (setf (proxy-file (gethash (quote ,name) *proxies*)) ,path)
