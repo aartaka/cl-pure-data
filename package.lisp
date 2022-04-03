@@ -37,7 +37,10 @@
    #:with-patch
    #:message
    #:subscribe
-   #:release))
+   #:release
+
+   ;; Proxies
+   #:defproxy))
 
 (defpackage #:libpd
   (:import-from #:cffi #:defcfun)
