@@ -36,7 +36,7 @@
           finally (return result))))
 
 (defmethod pd:release :around ()
-  (prog1
-      (call-next-method)
+  (unwind-protect
+       (call-next-method)
     (also-alsa:drain *alsa-out*)
     (also-alsa:alsa-close *alsa-out*)))
