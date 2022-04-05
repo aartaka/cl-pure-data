@@ -31,7 +31,7 @@ A symbol->alist hash-table.")
   (incoming '() :type list))
 
 (defstruct toplevel
-  (input nil :type line))
+  (inputs nil :type list))
 
 (defstruct (variable-line (:include line))
   (name (alexandria:required-argument "name") :type string))
@@ -52,7 +52,7 @@ A symbol->alist hash-table.")
 
 (defmethod pd-serialize ((value toplevel))
   (format *pd* "#N canvas 50 50 2000 8000 14;~%")
-  (pd-serialize (toplevel-input value))
+  (mapcar #'pd-serialize (toplevel-inputs value))
   (loop for (out outlet in inlet) in *connections*
         do (format *pd* "#X connect ~d ~d ~d ~d;~%"
                    out outlet in inlet)))
@@ -134,7 +134,7 @@ Example:
 \(loop repeat 1000 do (pd:process #()))"
   (let* ((*object-id* 0)
          (*connections* '())
-         (compiled (make-toplevel :input (pd-compile (first body))))
+         (compiled (make-toplevel :inputs (mapcar #'pd-compile body)))
          (parsed-args (multiple-value-list (alexandria:parse-ordinary-lambda-list args)))
          (arg-names (destructuring-bind (required optional rest keywords &rest _)
                         parsed-args
