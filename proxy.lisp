@@ -160,5 +160,5 @@ Example:
                             (push (cons ,(low-princ arg) ,arg)
                                   (gethash (quote ,name) *last-proxy-messages*))
                             (pd:message ,(low-princ arg) ,arg))))
-       (defun ,(intern (format nil "~a-OFF" (symbol-name name))) ()
+       (defun ,(alexandria:symbolicate name '-off) ()
          (proxy-off (quote ,name))))))
