@@ -34,6 +34,41 @@ After it loads fine, you can start hacking:
 
 And then do whatever you want with the data you get!
 
+* Proxies
+
+cl-pure-data exposes the ~defproxy~ macro to define proxies -- patch-backed Lisp code seamlessly translating into PD code. It's somewhat restricted at the moment, but is also working for dynamic patching (pun intended) of PD files and on-the-fly processing.
+
+To see how that works, try (taken from the ~defproxy~ documentation)
+#+begin_src lisp
+  ;; Assuming you initialized cl-pure-data as in previous snippets already.
+  ;;
+  ;; This creates two functions, bloopy and bloopy-off, loading and
+  ;; unloading the generated patch respectively. The contents of the
+  ;; patch are the PD commands generated from the Lisp code in the body.
+  (pd:defproxy bloopy ()
+    (dac~ (osc~ (+~ (*~ (samphold~ (noise~) (phasor~ 6)) 200) 440))))
+  ;; Start bloopy. You won't hear anything, but `ps:process' will start returning different values
+  (bloopy)
+  ;; Make it emit sound. Ensure you have cl-pure-data/asla or an equivalent loaded!
+  (loop repeat 1000 do (pd:process #()))
+  ;; Disable bloopy.
+  (bloopy-off)
+
+  ;; Create an even simpler proxy, yet having an argument.
+  (pd:defproxy osc (&optional (freq 440))
+    (dac~ (osc~ freq)))
+  ;; Initialize it and make it play sound. Use the default frequency.
+  (osc)
+  (loop repeat 500 do (pd:process #()))
+  ;; Now change the frequency to something audibly higher.
+  (osc 600)
+  (loop repeat 500 do (pd:process #()))
+  ;; Don't run this -- for the safety of your ears!
+  (osc 4000)
+  (loop repeat 1000 do (pd:process #()))
+#+end_src
+
+
 * Structure of the library
 - Low-level API:
   - libpd.lisp :: low-level bindings to libpd. C functions with lispy names, beware of malloc&free business!
@@ -42,6 +77,7 @@ And then do whatever you want with the data you get!
   - arr.lisp :: high-level-ish bindings for PD arrays. Exposes ~arr~ to reference arrays by name, ~contents~ to get subsequences of those (literally the same set of arguments as ~subseq~), and ~elem~ to reference just one element (think ~elt~). Both ~contents~ and ~elem~ are ~setf~-able.
   - audio.lisp :: high-level API to PD audio processing capabilities. ~init-audio~ sets things up for processing, while ~process~ takes an input and produces and output, threading it all through PureData image.
   - pure-data.lisp :: generic high-level macros (~with-pd~, ~defpdfun~), patch handling (~open-patch~, ~close-patch~, ~with-patch~), message-sending (~message~), and cleanup (~release~).
+  - proxy.lisp :: Proxies (terminology taken from cl-collider) to express PD patches in Lisp code and dynamically modifying those. All with the help of ~defproxy~ macro.
 
 Most of the ~cl-pure-data~ functions return
 - ~t~ (or other meaningful truthy value) on success
