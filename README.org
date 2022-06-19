@@ -43,7 +43,7 @@ To see how that works, try (taken from the ~defproxy~ documentation)
   ;; Assuming you initialized cl-pure-data as in previous snippets already.
   (pd:init-default-hooks)
   (pd:init-audio 0 1 44100)
-  (pd:message \"pd\" \"dsp\" 1)
+  (pd:message "pd" "dsp" 1)
   ;;
   ;; This creates two functions, bloopy and bloopy-off, loading and
   ;; unloading the generated patch respectively. The contents of the
