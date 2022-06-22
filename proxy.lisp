@@ -25,10 +25,14 @@ A symbol->alist hash-table.")
 (defstruct line
   (id (get-id) :type integer))
 
-(defstruct (object-line (:include line))
-  (name (alexandria:required-argument "name") :type string)
+(defstruct (generic-object-line (:include line))
   (args '() :type list)
   (incoming '() :type list))
+
+(defstruct (object-line (:include generic-object-line))
+  (name (alexandria:required-argument "name") :type string))
+
+(defstruct (message-line (:include generic-object-line)))
 
 (defstruct toplevel
   (inputs nil :type list))
@@ -42,10 +46,14 @@ A symbol->alist hash-table.")
           collect el into connections
         else
           collect el into args
-        finally (return (make-object-line
-                         :name (low-princ (first value))
-                         :args args
-                         :incoming (mapcar #'pd-compile connections)))))
+        finally (return (if (eq :msg (first value))
+                            (make-message-line
+                             :args args
+                             :incoming (mapcar #'pd-compile connections))
+                            (make-object-line
+                             :name (low-princ (first value))
+                             :args args
+                             :incoming (mapcar #'pd-compile connections))))))
 
 (defmethod pd-compile ((value symbol))
   (make-variable-line :name (low-princ value)))
@@ -67,6 +75,12 @@ A symbol->alist hash-table.")
     (push (list (line-id in) 0 (line-id value) (position in (object-line-incoming value))) *connections*))
   (format *pd* "#X obj 100 100 ~a~{ ~a~};~%"
           (object-line-name value) (object-line-args value)))
+
+(defmethod pd-serialize ((value message-line))
+  (dolist (in (message-line-incoming value))
+    (pd-serialize in)
+    (push (list (line-id in) 0 (line-id value) (position in (message-line-incoming value))) *connections*))
+  (format *pd* "#X msg 100 100~{ ~a~};~%" (message-line-args value)))
 
 (defun proxy-on (name path)
   (unless (equal (gethash name *proxies*) path)
