@@ -466,3 +466,21 @@ which is separate from the midi ringbuffer.")
 (defcfun "libpd_queued_receive_midi_messages" :void
   "Process and dispatch receive midi messages in the midi message ringbuffer,
 which is separate form the pd message ringbuffer.")
+
+
+;;; Queued hooks
+
+(defcfun "libpd_set_queued_printhook" :void)
+(defcfun "libpd_set_queued_banghook" :void)
+(defcfun "libpd_set_queued_floathook" :void)
+(defcfun "libpd_set_queued_symbolhook" :void)
+(defcfun "libpd_set_queued_listhook" :void)
+(defcfun "libpd_set_queued_messagehook" :void)
+
+(defcfun "libpd_set_queued_noteonhook" :void)
+(defcfun "libpd_set_queued_controlchangehook" :void)
+(defcfun "libpd_set_queued_programchangehook" :void)
+(defcfun "libpd_set_queued_pitchbendhook" :void)
+(defcfun "libpd_set_queued_aftertouchhook" :void)
+(defcfun "libpd_set_queued_polyaftertouchhook" :void)
+(defcfun "libpd_set_queued_midibytehook" :void)

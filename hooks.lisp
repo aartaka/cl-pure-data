@@ -91,12 +91,21 @@ NOTE: Only run it after PD is initiated! In most cases, this is taken
 care of by any function from `cl-pure-data' that you use, so you don't
 have to call this function directly. However, if you use `libpd'
 directly, take care to first initialize PD with `libpd:libpd-init'."
-  (libpd:libpd-set-printhook (cffi:callback print-hook-callback))
-  (libpd:libpd-set-banghook (cffi:callback bang-hook-callback))
-  (libpd:libpd-set-floathook (cffi:callback float-hook-callback))
-  (libpd:libpd-set-symbolhook (cffi:callback symbol-hook-callback))
-  (libpd:libpd-set-listhook (cffi:callback list-hook-callback))
-  (libpd:libpd-set-messagehook (cffi:callback message-hook-callback)))
+  (if *queued*
+      (progn
+        (libpd:libpd-set-queued-printhook (cffi:callback print-hook-callback))
+        (libpd:libpd-set-queued-banghook (cffi:callback bang-hook-callback))
+        (libpd:libpd-set-queued-floathook (cffi:callback float-hook-callback))
+        (libpd:libpd-set-queued-symbolhook (cffi:callback symbol-hook-callback))
+        (libpd:libpd-set-queued-listhook (cffi:callback list-hook-callback))
+        (libpd:libpd-set-queued-messagehook (cffi:callback message-hook-callback)))
+      (progn
+        (libpd:libpd-set-printhook (cffi:callback print-hook-callback))
+        (libpd:libpd-set-banghook (cffi:callback bang-hook-callback))
+        (libpd:libpd-set-floathook (cffi:callback float-hook-callback))
+        (libpd:libpd-set-symbolhook (cffi:callback symbol-hook-callback))
+        (libpd:libpd-set-listhook (cffi:callback list-hook-callback))
+        (libpd:libpd-set-messagehook (cffi:callback message-hook-callback)))))
 
 (defun init-default-hooks ()
   (setf *print-hook* (list (lambda (receiver)
