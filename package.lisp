@@ -79,4 +79,7 @@
    #:libpd-new-instance #:libpd-set-instance #:libpd-free-instance
    #:libpd-this-instance #:libpd-get-instance #:libpd-num-instances
 
-   #:libpd-set-verbose #:libpd-get-verbose))
+   #:libpd-set-verbose #:libpd-get-verbose
+
+   #:libpd-queued-init #:libpd-queued-release
+   #:libpd-queued-receive-pd-messages #:libpd-queued-receive-midi-messages))

@@ -9,6 +9,9 @@ If nil, PD is not yet initialized.")
 (defvar *verbose* 1
   "Verbose print state.")
 
+(defvar *queued* nil
+  "Whether PD is initialized as queued.")
+
 (defvar *patches* (make-hash-table :test #'equal)
   "A table of all the opened patches (as path -> raw pointers hash table).")
 
@@ -18,13 +21,20 @@ If nil, PD is not yet initialized.")
 (defvar *search-path* '()
   "List of paths to search for external patches.")
 
-(defmethod init ()
+(defmethod init (&key (queued *queued*))
   "Unexported initialization sequence that happens before every defpdfun-ed function call."
-  (if *instance*
-      (libpd:libpd-set-instance *instance*)
-      (progn
-        (libpd:libpd-init)
-        (setf *instance* (libpd:libpd-this-instance))))
+  (cond
+    (*instance*
+     (libpd:libpd-set-instance *instance*)
+     (setf *queued* queued))
+    (queued
+     (libpd:libpd-queued-init)
+     (setf *queued* t
+           *instance* (libpd:libpd-this-instance)))
+    (t
+     (libpd:libpd-init)
+     (setf *queued* nil
+           *instance* (libpd:libpd-this-instance))))
   (init-hooks)
   (libpd:libpd-clear-search-path)
   (mapcar (alexandria:compose #'libpd:libpd-add-to-search-path #'uiop:native-namestring)
@@ -99,6 +109,8 @@ Close the patch after BODY returns."
   t)
 
 (defpdfun release ()
+  (when *queued*
+    (libpd:libpd-queued-release))
   (mapcar #'close-patch (alexandria:hash-table-keys *patches*))
   (mapcar #'libpd:libpd-unbind *subscriptions*)
   t)

@@ -450,3 +450,19 @@ Returns 1 when libpd is not compiled with PDINSTANCE.")
 
 (defcfun "libpd_get_verbose" :int
   "Get the verbose print state: 0 or 1.")
+
+;;; Queued API
+
+(defcfun "libpd_queued_init" :int
+  "Initialize libpd and the queued ringbuffers. Use in place of `libpd-init'.")
+
+(defcfun "libpd_queued_release" :void
+  "Frees the ringbuffers.")
+
+(defcfun "libpd_queued_receive_pd_messages" :void
+  "Process and dispatch received messages in the pd message ringbuffer,
+which is separate from the midi ringbuffer.")
+
+(defcfun "libpd_queued_receive_midi_messages" :void
+  "Process and dispatch receive midi messages in the midi message ringbuffer,
+which is separate form the pd message ringbuffer.")
