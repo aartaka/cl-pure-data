@@ -9,7 +9,9 @@ If nil, PD is not yet initialized.")
 (defvar *verbose* 1
   "Verbose print state.")
 
-(defvar *queued* nil
+(defvar *queued*
+  #+thread-support t
+  #-thread-support nil
   "Whether PD is initialized as queued.")
 
 (defvar *patches* (make-hash-table :test #'equal)
