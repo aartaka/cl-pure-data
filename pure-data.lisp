@@ -10,8 +10,31 @@ If nil, PD is not yet initialized.")
   "Verbose print state.")
 
 (defvar *queued*
-  #+thread-support t
-  #-thread-support nil
+  ;; Stolen from bordeaux-threads.
+  #+(or armedbear
+        (and allegro multiprocessing)
+        (and clisp mt)
+        (and openmcl openmcl-native-threads)
+        (and cmu mp)
+        corman
+        (and ecl threads)
+        mkcl
+        lispworks
+        (and digitool ccl-5.1)
+        (and sbcl sb-thread)
+        scl) t
+  #-(or armedbear
+        (and allegro multiprocessing)
+        (and clisp mt)
+        (and openmcl openmcl-native-threads)
+        (and cmu mp)
+        corman
+        (and ecl threads)
+        mkcl
+        lispworks
+        (and digitool ccl-5.1)
+        (and sbcl sb-thread)
+        scl) nil
   "Whether PD is initialized as queued.")
 
 (defvar *patches* (make-hash-table :test #'equal)
