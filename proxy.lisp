@@ -177,9 +177,13 @@ Example:
                  path)))
     (when (gethash name *proxies*)
       (proxy-on name path)
+      ;; TODO: Come up with something smarter to be more flexible with
+      ;; &optional and &keyword arguments.
       (loop for (receiver . value) in (gethash name *last-proxy-messages*)
             do (pd:message receiver value)))
     `(progn
+       (defun ,(alexandria:symbolicate name '-off) ()
+         (proxy-off (quote ,name)))
        (defun ,name ,args
          (proxy-on (quote ,name) ,path)
          (setf (gethash (quote ,name) *last-proxy-messages*) '())
@@ -187,6 +191,4 @@ Example:
                  collect `(when ,arg
                             (push (cons ,(low-princ arg) ,arg)
                                   (gethash (quote ,name) *last-proxy-messages*))
-                            (pd:message ,(low-princ arg) ,arg))))
-       (defun ,(alexandria:symbolicate name '-off) ()
-         (proxy-off (quote ,name))))))
+                            (pd:message ,(low-princ arg) ,arg)))))))
