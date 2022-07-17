@@ -165,10 +165,8 @@ Example:
   (let* ((*object-id* 0)
          (*connections* '())
          (compiled (make-toplevel :inputs (mapcar #'pd-compile body)))
-         (parsed-args (multiple-value-list (alexandria:parse-ordinary-lambda-list args)))
-         (arg-names (destructuring-bind (required optional rest keywords &rest _)
-                        parsed-args
-                      (declare (ignorable _))
+         (arg-names (multiple-value-bind (required optional rest keywords)
+                        (alexandria:parse-ordinary-lambda-list args)
                       (append required (mapcar #'first optional)
                               (uiop:ensure-list rest) (mapcar #'cadar keywords))))
          (path (uiop:with-temporary-file (:pathname path
