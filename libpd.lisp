@@ -470,17 +470,30 @@ which is separate form the pd message ringbuffer.")
 
 ;;; Queued hooks
 
-(defcfun "libpd_set_queued_printhook" :void)
-(defcfun "libpd_set_queued_banghook" :void)
-(defcfun "libpd_set_queued_floathook" :void)
-(defcfun "libpd_set_queued_symbolhook" :void)
-(defcfun "libpd_set_queued_listhook" :void)
-(defcfun "libpd_set_queued_messagehook" :void)
+(defcfun "libpd_set_queued_printhook" :void
+  (hook :pointer))
+(defcfun "libpd_set_queued_banghook" :void
+  (hook :pointer))
+(defcfun "libpd_set_queued_floathook" :void
+  (hook :pointer))
+(defcfun "libpd_set_queued_symbolhook" :void
+  (hook :pointer))
+(defcfun "libpd_set_queued_listhook" :void
+  (hook :pointer))
+(defcfun "libpd_set_queued_messagehook" :void
+  (hook :pointer))
 
-(defcfun "libpd_set_queued_noteonhook" :void)
-(defcfun "libpd_set_queued_controlchangehook" :void)
-(defcfun "libpd_set_queued_programchangehook" :void)
-(defcfun "libpd_set_queued_pitchbendhook" :void)
-(defcfun "libpd_set_queued_aftertouchhook" :void)
-(defcfun "libpd_set_queued_polyaftertouchhook" :void)
-(defcfun "libpd_set_queued_midibytehook" :void)
+(defcfun "libpd_set_queued_noteonhook" :void
+  (hook :pointer))
+(defcfun "libpd_set_queued_controlchangehook" :void
+  (hook :pointer))
+(defcfun "libpd_set_queued_programchangehook" :void
+  (hook :pointer))
+(defcfun "libpd_set_queued_pitchbendhook" :void
+  (hook :pointer))
+(defcfun "libpd_set_queued_aftertouchhook" :void
+  (hook :pointer))
+(defcfun "libpd_set_queued_polyaftertouchhook" :void
+  (hook :pointer))
+(defcfun "libpd_set_queued_midibytehook" :void
+  (hook :pointer))
