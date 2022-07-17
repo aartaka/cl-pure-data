@@ -30,7 +30,9 @@ A symbol->alist hash-table.")
   (incoming '() :type list))
 
 (defstruct (object-line (:include generic-object-line))
-  (name (alexandria:required-argument "name") :type string))
+  (name (alexandria:required-argument "name") :type string)
+  (incoming1 '() :type list)
+  (incoming2 '() :type list))
 
 (defstruct (message-line (:include generic-object-line)))
 
@@ -53,7 +55,15 @@ A symbol->alist hash-table.")
                             (make-object-line
                              :name (low-princ (first value))
                              :args args
-                             :incoming (mapcar #'pd-compile connections))))))
+                             :incoming (mapcar #'pd-compile
+                                               (subseq connections 0 (position :1 connections)))
+                             :incoming1 (when (find :1 connections)
+                                          (mapcar #'pd-compile
+                                                  (subseq connections (1+ (position :1 connections))
+                                                          (position :2 connections))))
+                             :incoming2 (when (find :2 connections)
+                                          (mapcar #'pd-compile
+                                                  (subseq connections (1+ (position :2 connections))))))))))
 
 (defmethod pd-compile ((value symbol))
   (make-variable-line :name (low-princ value)))
@@ -72,14 +82,20 @@ A symbol->alist hash-table.")
 (defmethod pd-serialize ((value object-line))
   (dolist (in (object-line-incoming value))
     (pd-serialize in)
-    (push (list (line-id in) 0 (line-id value) (position in (object-line-incoming value))) *connections*))
+    (push (list (line-id in) 0 (line-id value) 0) *connections*))
+  (dolist (in (object-line-incoming1 value))
+    (pd-serialize in)
+    (push (list (line-id in) 0 (line-id value) 1) *connections*))
+  (dolist (in (object-line-incoming2 value))
+    (pd-serialize in)
+    (push (list (line-id in) 0 (line-id value) 2) *connections*))
   (format *pd* "#X obj 100 100 ~a~{ ~a~};~%"
           (object-line-name value) (object-line-args value)))
 
 (defmethod pd-serialize ((value message-line))
   (dolist (in (message-line-incoming value))
     (pd-serialize in)
-    (push (list (line-id in) 0 (line-id value) (position in (message-line-incoming value))) *connections*))
+    (push (list (line-id in) 0 (line-id value) 0) *connections*))
   (format *pd* "#X msg 100 100~{ ~a~};~%" (message-line-args value)))
 
 (defun proxy-on (name path)
