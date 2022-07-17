@@ -4,6 +4,7 @@
 
 (defclass arr ()
   ((name :initarg :name
+         :reader name
          :initform (alexandria:required-argument "name"))))
 
 (defun arr (name)
@@ -18,36 +19,40 @@ If end is nil, read all of the array from START index.
 Does bound-checking, raises errors and returns nil in case of problems.
 
 Setf-able."
-  (let* ((pd-array-length (libpd:libpd-arraysize (slot-value array 'name)))
+  (let* ((pd-array-length (libpd:libpd-arraysize (name array)))
          (end (or end (1- pd-array-length)))
          (size (- end start))
-         (array-type (cffi::ensure-parsed-base-type (list :array :float size))))
+         (contents (make-array size :element-type 'float :initial-element 0.0))
+         (array-type (list :array :float size))
+         (foreign (cffi:foreign-array-alloc contents array-type)))
     (when (or (> end pd-array-length)
               (< end start)
               (minusp start))
       (error "Expected indices in between 0 and ~d, got (~d, ~d)"
              (1- pd-array-length) start end))
-    (cffi:with-foreign-array
-        (arr (make-array size :element-type 'float :initial-element 0.0) array-type)
-      (if (zerop (libpd:libpd-read-array arr (slot-value array 'name) start size))
-          (cffi:foreign-array-to-lisp arr array-type)
-          nil))))
+    (unwind-protect
+         (if (zerop (libpd:libpd-read-array foreign (name array) start size))
+             contents
+             nil)
+      (cffi:foreign-array-free foreign))))
 
 (defmethod (setf contents) ((new-value array) (array arr) &optional (start 0) end)
-  (let* ((pd-array-length (libpd:libpd-arraysize (slot-value array 'name)))
+  (let* ((pd-array-length (libpd:libpd-arraysize (name array)))
          (end (or end (1- pd-array-length)))
          (size (- end start))
-         (array-type (cffi::ensure-parsed-base-type (list :array :float size)))
+         (array-type (list :array :float size))
          (new-value (map 'vector (lambda (e) (coerce e 'single-float)) new-value)))
     (when (or (> end pd-array-length)
               (< end start)
               (minusp start))
       (error "Expected indices in between 0 and ~d, got (~d, ~d)."
              (1- pd-array-length) start end))
-    (cffi:with-foreign-array (arr new-value array-type)
-      (if (zerop (libpd:libpd-write-array (slot-value array 'name) start arr size))
-          new-value
-          nil))))
+    (let ((foreign (cffi:foreign-array-alloc new-value array-type)))
+      (unwind-protect
+           (if (zerop (libpd:libpd-write-array (name array) start foreign size))
+               new-value
+               nil)
+        (cffi:foreign-array-free foreign)))))
 
 (defmethod elem ((array arr) (index integer))
   "Get ARRAY element by INDEX. Setf-able."
