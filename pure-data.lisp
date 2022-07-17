@@ -67,6 +67,7 @@ Return T in case of success, nil otherwise. If it hangs -- something's terribly 
              (uiop:absolute-pathname-p pathname)
              (gethash (uiop:native-namestring pathname) *patches*))
     (libpd:libpd-closefile (gethash (uiop:native-namestring pathname) *patches*))
+    (remhash (uiop:native-namestring pathname) *patches*)
     t))
 
 (defmethod close-patch ((pathname string))
