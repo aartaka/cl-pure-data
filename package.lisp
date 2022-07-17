@@ -30,6 +30,7 @@
    #:*instance*
    #:*verbose*
    #:*search-path*
+   #:*queued*
    #:with-pd
    #:defpdfun
    #:open-patch
