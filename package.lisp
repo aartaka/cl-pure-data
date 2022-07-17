@@ -82,4 +82,13 @@
    #:libpd-set-verbose #:libpd-get-verbose
 
    #:libpd-queued-init #:libpd-queued-release
-   #:libpd-queued-receive-pd-messages #:libpd-queued-receive-midi-messages))
+   #:libpd-queued-receive-pd-messages #:libpd-queued-receive-midi-messages
+
+   #:libpd-set-queued-printhook #:libpd-set-queued-messagehook
+   #:libpd-set-queued-banghook #:libpd-set-queued-floathook #:libpd-set-queued-symbolhook
+   #:libpd-set-queued-listhook
+
+   #:libpd-set-queued-noteonhook #:libpd-set-queued-controlchangehook
+   #:libpd-set-queued-programchangehook #:libpd-set-queued-pitchbendhook
+   #:libpd-set-queued-aftertouchhook #:libpd-set-queued-polyaftertouchhook
+   #:libpd-set-queued-midibytehook))
