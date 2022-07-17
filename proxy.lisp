@@ -100,8 +100,8 @@ A symbol->alist hash-table.")
 
 (defun proxy-on (name path)
   (unless (equal (gethash name *proxies*) path)
-    (alexandria:when-let ((proxy-file (gethash name *proxies*)))
-      (close-patch proxy-file))
+    (when (gethash name *proxies*)
+      (proxy-off name))
     (open-patch (setf (gethash name *proxies*) path))))
 
 (defun proxy-off (name)
