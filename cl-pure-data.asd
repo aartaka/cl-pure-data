@@ -9,6 +9,7 @@
   :depends-on (#:cffi #:alexandria)
   :components ((:file "package")
                (:file "libpd")
+               (:file "globals")
                (:file "hooks")
                (:file "pure-data")
                (:file "arr")
