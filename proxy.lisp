@@ -34,6 +34,10 @@ A symbol->alist hash-table.")
   (incoming1 '() :type list)
   (incoming2 '() :type list))
 
+(defstruct (floatatom-line (:include generic-object-line))
+  (min 0 :type float)
+  (max 100 :type float))
+
 (defstruct (message-line (:include generic-object-line)))
 
 (defstruct toplevel
@@ -53,6 +57,14 @@ A symbol->alist hash-table.")
                     (:msg (make-message-line
                            :args args
                            :incoming (mapcar #'pd-compile connections)))
+                    ((:number :float :floatatom)
+                     (apply #'make-floatatom-line
+                            (append
+                             (when (getf args :min)
+                               (list :min (getf args :min)))
+                             (when (getf args :max)
+                               (list :max (getf args :max)))
+                             (list :incoming (mapcar #'pd-compile connections)))))
                     (t (make-object-line
                         :name (low-princ (first value))
                         :args args
@@ -79,6 +91,12 @@ A symbol->alist hash-table.")
 (defmethod pd-serialize ((value variable-line))
   (format *pd* "#X floatatom 100 100 5 0 0 0 - ~a -;~%"
           (variable-line-name value)))
+
+(defmethod pd-serialize ((value floatatom-line))
+  (format *pd* "#X floatatom 100 100 ~d ~d ~d 0 - - -;~%"
+          (ceiling (log (floatatom-line-max value) 10))
+          (floatatom-line-min value)
+          (floatatom-line-max value)))
 
 (defmethod pd-serialize ((value object-line))
   (dolist (in (object-line-incoming value))
