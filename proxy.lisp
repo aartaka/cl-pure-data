@@ -135,7 +135,10 @@ A symbol->alist hash-table.")
   (dolist (in (message-line-incoming value))
     (pd-serialize in)
     (push (list (line-id in) 0 (line-id value) 0) *connections*))
-  (format *pd* "#X msg 100 100~{ ~a~};~%" (message-line-args value)))
+  (format *pd* "#X msg 100 100~{ ~a~};~%"
+          (mapcar (lambda (arg)
+                    (uiop:frob-substrings (princ-to-string arg) '(",") " \\,"))
+                  (message-line-args value))))
 
 (defun proxy-on (name path)
   (unless (equal (gethash name *proxies*) path)
