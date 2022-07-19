@@ -103,7 +103,7 @@ A symbol->alist hash-table.")
 
 (defmethod pd-serialize ((value array-line))
   (format *pd*
-          "#X array ~a ~d float 1;~%#A ~{~f ~};~%"
+          "#X array ~a ~d float 0;~%#A 0~{ ~f~};~%"
           (array-line-name value)
           (length (array-line-contents value))
           (array-line-contents value)))
