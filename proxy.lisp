@@ -48,22 +48,23 @@ A symbol->alist hash-table.")
           collect el into connections
         else
           collect el into args
-        finally (return (if (eq :msg (first value))
-                            (make-message-line
-                             :args args
-                             :incoming (mapcar #'pd-compile connections))
-                            (make-object-line
-                             :name (low-princ (first value))
-                             :args args
-                             :incoming (mapcar #'pd-compile
-                                               (subseq connections 0 (position :1 connections)))
-                             :incoming1 (when (find :1 connections)
-                                          (mapcar #'pd-compile
-                                                  (subseq connections (1+ (position :1 connections))
-                                                          (position :2 connections))))
-                             :incoming2 (when (find :2 connections)
-                                          (mapcar #'pd-compile
-                                                  (subseq connections (1+ (position :2 connections))))))))))
+        finally (return
+                  (case (first value)
+                    (:msg (make-message-line
+                           :args args
+                           :incoming (mapcar #'pd-compile connections)))
+                    (t (make-object-line
+                        :name (low-princ (first value))
+                        :args args
+                        :incoming (mapcar #'pd-compile
+                                          (subseq connections 0 (position :1 connections)))
+                        :incoming1 (when (find :1 connections)
+                                     (mapcar #'pd-compile
+                                             (subseq connections (1+ (position :1 connections))
+                                                     (position :2 connections))))
+                        :incoming2 (when (find :2 connections)
+                                     (mapcar #'pd-compile
+                                             (subseq connections (1+ (position :2 connections)))))))))))
 
 (defmethod pd-compile ((value symbol))
   (make-variable-line :name (low-princ value)))
