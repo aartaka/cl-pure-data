@@ -25,6 +25,10 @@ A symbol->alist hash-table.")
 (defstruct line
   (id (get-id) :type integer))
 
+(defstruct (array-line (:include line))
+  (name (alexandria:required-argument "name") :type string)
+  (contents (alexandria:required-argument "contents") :type sequence))
+
 (defstruct (generic-object-line (:include line))
   (args '() :type list)
   (incoming '() :type list))
@@ -57,6 +61,15 @@ A symbol->alist hash-table.")
                     (:msg (make-message-line
                            :args args
                            :incoming (mapcar #'pd-compile connections)))
+                    ((:array :arr)
+                     (apply #'make-array-line
+                            :contents (third value)
+                            (append
+                             (when (stringp (second value))
+                               (list :name (second value)))
+                             (when (typep (third value) 'sequence)
+                               (list :contents (third value)))
+                             nil)))
                     ((:number :float :floatatom)
                      (apply #'make-floatatom-line
                             (append
@@ -87,6 +100,13 @@ A symbol->alist hash-table.")
   (loop for (out outlet in inlet) in *connections*
         do (format *pd* "#X connect ~d ~d ~d ~d;~%"
                    out outlet in inlet)))
+
+(defmethod pd-serialize ((value array-line))
+  (format *pd*
+          "#X array ~a ~d float 1;~%#A ~{~f ~};~%"
+          (array-line-name value)
+          (length (array-line-contents value))
+          (array-line-contents value)))
 
 (defmethod pd-serialize ((value variable-line))
   (format *pd* "#X floatatom 100 100 5 0 0 0 - ~a -;~%"
