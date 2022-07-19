@@ -32,7 +32,7 @@ Setf-able."
              (1- pd-array-length) start end))
     (unwind-protect
          (if (zerop (libpd:libpd-read-array foreign (name array) start size))
-             contents
+             (cffi:foreign-array-to-lisp foreign array-type)
              nil)
       (cffi:foreign-array-free foreign))))
 
