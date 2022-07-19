@@ -233,4 +233,5 @@ Example:
                  collect `(when ,arg
                             (push (cons ,(low-princ arg) ,arg)
                                   (gethash (quote ,name) *last-proxy-messages*))
-                            (pd:message ,(low-princ arg) ,arg)))))))
+                            (pd:message ,(low-princ arg) ,arg))))
+       ,path)))
