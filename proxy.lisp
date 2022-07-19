@@ -58,6 +58,17 @@ A symbol->alist hash-table.")
           collect el into args
         finally (return
                   (case (first value)
+                    ((:cnt :counter)
+                     (let* ((float (make-object-line
+                                    :name "f"
+                                    :incoming (mapcar #'pd-compile connections)))
+                            (increaser (make-object-line
+                                        :name "+"
+                                        :args '(1)
+                                        :incoming (list float))))
+                       (setf (object-line-incoming1 float)
+                             (list increaser))
+                       increaser))
                     (:msg (make-message-line
                            :args args
                            :incoming (mapcar #'pd-compile connections)))
@@ -93,6 +104,17 @@ A symbol->alist hash-table.")
 
 (defmethod pd-compile ((value symbol))
   (make-variable-line :name (low-princ value)))
+
+(defvar *printed-already* (make-hash-table)
+  "The table of the nodes that are already printed.
+Helps in avoiding infinite recursive printing.")
+
+(defmethod pd-serialize :around ((value generic-object-line))
+  (if (gethash value *printed-already*)
+      nil
+      (progn
+        (setf (gethash value *printed-already*) value)
+        (call-next-method))))
 
 (defmethod pd-serialize ((value toplevel))
   (format *pd* "#N canvas 50 50 2000 8000 14;~%")
