@@ -131,7 +131,7 @@ Helps in avoiding infinite recursive printing.")
           (array-line-contents value)))
 
 (defmethod pd-serialize ((value variable-line))
-  (format *pd* "#X floatatom 100 100 5 0 0 0 - ~a -;~%"
+  (format *pd* "#X obj 100 100 r ~a;~%"
           (variable-line-name value)))
 
 (defmethod pd-serialize ((value floatatom-line))
